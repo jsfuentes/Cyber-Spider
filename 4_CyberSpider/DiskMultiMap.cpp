@@ -91,18 +91,18 @@ bool DiskMultiMap::insert(const std::string& key, const std::string& value,
 	//points new node to the original first value
 	if (h.emptyHead == -1)
 	{
-		cout << "Node-1: " << bf.fileLength();
 		if (!bf.write(bf.fileLength(), bucketPlace))
 			cout << "Failed to write"; //points head node with new node
 		if (!bf.write(n, bf.fileLength()))
 			cout << "Failed to Write";
-		cout << "Node+1: " << bf.fileLength() << endl;
 	}
 	else
 	{
 		
 
 	}
+	h.numOfNodes++;
+	bf.write(h, 0);
 	return true;
 }
 
@@ -111,18 +111,13 @@ bool DiskMultiMap::createNew(const std::string& filename, unsigned int numBucket
 	close();
 	if (!bf.createNew(filename))
 		return false;
-	cout << "B4:: " << bf.fileLength() << endl;
 	Header h;
 	h.emptyHead = -1;
 	h.numOfNodes = 0;
 	h.numBuckets = numBuckets;
 	bf.write(h, 0);
 	for (int i = 0; i != numBuckets; i++)
-	{
-		cout << "B4:: " << bf.fileLength();
 		bf.write(-1, bf.fileLength());
-		cout << "AFTER : " << bf.fileLength() << endl;
-	}
 	return true;
 }
 
@@ -130,11 +125,13 @@ void DiskMultiMap::close()
 {
 	if (bf.isOpen())
 	{
-		cout << "Header SIZE; " << sizeof(Header) << endl;
+		/* Header h;
+		bf.read(h, 0);
+		cout << "Header SIZE; " << sizeof(h) << endl;
 		cout << "Offset : " << sizeof(BinaryFile::Offset) << endl;
 		cout << "Node : " << sizeof(Node) << endl;
-		cout << "Total Bytes: " << sizeof(Header) + sizeof(BinaryFile::Offset) * 20 + sizeof(Node) * 4;
-		cout << "FILE LENGTH: " << bf.fileLength() << endl;
+		cout << "Total Bytes: " << sizeof(Header) + sizeof(BinaryFile::Offset) * h.numBuckets + sizeof(Node) * h.numOfNodes;
+		cout << "FILE LENGTH: " << bf.fileLength() << endl;*/
 		bf.close();
 	}
 }
