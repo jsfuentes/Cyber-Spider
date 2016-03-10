@@ -62,7 +62,10 @@ int DiskMultiMap::erase(const std::string& key, const std::string& value, const
 				if (!bf.write(curNode.nextNode, bucketPlace)) //replaces buckets first
 					cerr << "ERROR writing bucket in search ft";
 				firstNodePlace = curNode.nextNode;
-				curNodePlace = curNode.nextNode;
+				curNode.nextNode = h.emptyHead;
+				h.emptyHead = curNodePlace;
+				curNodePlace = firstNodePlace;
+
 			}
 			else //if its within the list and not first node so prev has been intialized
 			{
@@ -152,7 +155,7 @@ DiskMultiMap::Iterator DiskMultiMap::search(const std::string& key)
 bool DiskMultiMap::insert(const std::string& key, const std::string& value,
 	const std::string& context)
 {
-	cout << "B4: " << bf.fileLength() << endl;
+	cout << "B4: " << bf.fileLength() <<" ";
 	if (key.length() > 120 || value.length() > 120 || context.length() > 120)
 		return false;
 	Header h;
@@ -235,59 +238,51 @@ DiskMultiMap::~DiskMultiMap()
 	close();
 }
 
+void printAll(DiskMultiMap* x, string key)
+{
+	DiskMultiMap::Iterator it = x->search(key);
+	if (it.isValid())
+	{
+		cout << "I found at least 1 item with a key of " << key << endl;
+		do
+		{
+			MultiMapTuple m = *it; // get the association
+			cout << "The key is: " << m.key << endl;
+			cout << "The value is: " << m.value << endl;
+			cout << "The context is: " << m.context << endl;
+			cout << endl;
+			++it; // advance iterator to the next matching item
+		} while (it.isValid());
+	}
+}
+
 int main()
 {
 	DiskMultiMap x;
 	x.createNew("myhashtable.dat", 100); // empty, with 100 buckets
+	x.insert("hmm.exe", "faq.exe", "m52902");
+	x.insert("hmm.exe", "pfft.exe", "m10001");
+	x.insert("blah.exe", "bletch.exe", "m0003");
+	x.erase("hmm.exe", "pfft.exe", "m10001");
+	x.erase("blah.exe", "bletch.exe", "m0003");
+	x.erase("hmm.exe", "faq.exe", "m52902");
+	x.insert("hmm.exe", "pfft.exe", "m529afd2");
 	x.insert("hmm.exe", "pfft.exe", "m52902");
+	x.insert("help.exe", "ireallyneed.exe", "m124");
+	x.insert("help.exe", "rplze.exe", "m124");
+	x.erase("hmm.exe", "pfft.exe", "m52902");
+	x.insert("hmm.exe", "pfft.exe", "m52902");
+	printAll(&x, "hmm.exe");
+										 /*x.insert("hmm.exe", "pfft.exe", "m52902");
 	x.insert("hmm.exe", "pfft.exe", "m52902");
 	x.insert("hmm.exe", "pfft.exe", "m10001");
 	x.insert("blah.exe", "bletch.exe", "m0003");
 	x.search("JFLKJ:L");
-	DiskMultiMap::Iterator itt = x.search("blah.exe");
-	if (itt.isValid())
-	{
-		cout << "I found at least 1 item with a key of blah.exe\n";
-		do
-		{
-			MultiMapTuple m = *itt; // get the association
-			cout << "The key is: " << m.key << endl;
-			cout << "The value is: " << m.value << endl;
-			cout << "The context is: " << m.context << endl;
-			cout << endl;
-			++itt; // advance iterator to the next matching item
-		} while (itt.isValid());
-	}
-	DiskMultiMap::Iterator it = x.search("hmm.exe");
-	if (it.isValid())
-	{
-		cout << "I found at least 1 item with a key of hmm.exe\n";
-		do
-		{
-			MultiMapTuple m = *it; // get the association
-			cout << "The key is: " << m.key << endl;
-			cout << "The value is: " << m.value << endl;
-			cout << "The context is: " << m.context << endl;
-			cout << endl;
-			++it; // advance iterator to the next matching item
-		} while (it.isValid());
-	}
+	printAll(&x, "blah.exe");
+	printAll(&x, "hmm.exe");
 	cout << "ERASED BLAH: " << endl;
 	x.erase("blah.exe", "bletch.exe", "m0003");
-	it = x.search("blah.exe");
-	if (it.isValid())
-	{
-		cout << "I found at least 1 item with a key of blah.exe\n";
-		do
-		{
-			MultiMapTuple m = *it; // get the association
-			cout << "The key is: " << m.key << endl;
-			cout << "The value is: " << m.value << endl;
-			cout << "The context is: " << m.context << endl;
-			cout << endl;
-			++it; // advance iterator to the next matching item
-		} while (it.isValid());
-	}
+	printAll(&x, "blah.exe");
 	itt = x.search("hmm.exe");
 	if (itt.isValid())
 	{
@@ -393,52 +388,14 @@ int main()
 			++itt; // advance iterator to the next matching item
 		} while (itt.isValid());
 	}
-	cout << "MANY iNSERTESDLKFJL:J>>>>>>> " << endl;
-	x.insert("hmm.exe", "pfft.exe", "m52902");
-	x.insert("hmm.exe", "pfft.exe", "m52902");
-	x.insert("blah.exe", "bletch.exe", "m0003");
-	x.insert("thisistest.exe", "txtme.exe", "m666");
-	x.insert("thisistest.exe", "slam.exe", "m999");
-	it = x.search("blah.exe");
-	if (it.isValid())
-	{
-		cout << "I found at least 1 item with a key of blah.exe\n";
-		do
-		{
-			MultiMapTuple m = *it; // get the association
-			cout << "The key is: " << m.key << endl;
-			cout << "The value is: " << m.value << endl;
-			cout << "The context is: " << m.context << endl;
-			cout << endl;
-			++it; // advance iterator to the next matching item
-		} while (it.isValid());
-	}
-	itt = x.search("hmm.exe");
-	if (itt.isValid())
-	{
-		cout << "I found at least 1 item with a key of hmm.exe\n";
-		do
-		{
-			MultiMapTuple m = *itt; // get the association
-			cout << "The key is: " << m.key << endl;
-			cout << "The value is: " << m.value << endl;
-			cout << "The context is: " << m.context << endl;
-			cout << endl;
-			++itt; // advance iterator to the next matching item
-		} while (itt.isValid());
-	}
-	itt = x.search("thisistest.exe");
-	if (itt.isValid())
-	{
-		cout << "I found at least 1 item with a key of thisistest.exe\n";
-		do
-		{
-			MultiMapTuple m = *itt; // get the association
-			cout << "The key is: " << m.key << endl;
-			cout << "The value is: " << m.value << endl;
-			cout << "The context is: " << m.context << endl;
-			cout << endl;
-			++itt; // advance iterator to the next matching item
-		} while (itt.isValid());
-	}
+	x.insert("hmm.exe", "pffcvxt.exe", "m529d02");
+	x.insert("hmm.exe", "pfasdft.exe", "m100sda01");
+	x.insert("blah.exe", "bledsach.exe", "m00afdaf3");
+	x.insert("thisistest.exe", "plez.exe", "m000000");
+	x.insert("thisistest.exe", "ibeg.exe", "m0a0000");
+	printAll(&x, "blah.exe");
+	printAll(&x, "hmm.exe");
+	printAll(&x, "thisistest.exe");
+	*/
 }
+
